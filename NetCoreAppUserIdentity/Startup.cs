@@ -31,6 +31,7 @@ namespace NetCoreAppUserIdentity
             }
 
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseEndpoints(x => {
                 x.MapControllerRoute(name: "default", pattern: "{Controller=Home}/{Action=Index}/{id?}");
