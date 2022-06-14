@@ -32,7 +32,7 @@ namespace NetCoreAppUserIdentity.Controllers
                 user.Email = registerVM.Email;
                 user.UserName = registerVM.UserName;
 
-                var result = await _userManager.CreateAsync(user);
+                var result = await _userManager.CreateAsync(user,registerVM.Password);
                 if (result.Succeeded)
                 {
                     return View();
