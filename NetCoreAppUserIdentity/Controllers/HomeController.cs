@@ -9,10 +9,12 @@ namespace NetCoreAppUserIdentity.Controllers
     public class HomeController : Controller
     {
         private readonly UserManager<AppUser> _userManager;
+        private readonly SignInManager<AppUser> _signInManager;
 
-        public HomeController(UserManager<AppUser> userManager)
+        public HomeController(UserManager<AppUser> userManager,SignInManager<AppUser> signInManager)
         {
             _userManager = userManager;
+            _signInManager = signInManager;
         }
         public IActionResult Index()
         {
@@ -43,6 +45,36 @@ namespace NetCoreAppUserIdentity.Controllers
                 }
             }
             return View();
+        }
+
+        public IActionResult SignIn()
+        {
+            return View();
+        }
+        [HttpPost]
+        public async Task<IActionResult> SignIn(LoginVm loginVm)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = await _userManager.FindByEmailAsync(loginVm.Email); //Email'den db de var böyle bil kullanıcı olup olmadığını bakacak.
+                if (user != null)
+                {
+                    var result = _signInManager.PasswordSignInAsync(user, loginVm.Password, false, false);
+                    if (result.Result.Succeeded)
+                    {
+                        return RedirectToAction("Index", "Home");
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("errLogin", "Hatalı giriş!!..");
+                    }
+                }
+                return View();
+            }
+            else
+            {
+                return View();
+            }
         }
     }
 }
