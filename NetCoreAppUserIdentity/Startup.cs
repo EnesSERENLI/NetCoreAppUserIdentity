@@ -38,7 +38,7 @@ namespace NetCoreAppUserIdentity
             }).AddEntityFrameworkStores<AppDbContext>();
 
             //NetCore6 yapýlandýrma
-            //services.Configure<IdentityOptions>(options =>
+            //builder.Services.Configure<IdentityOptions>(options =>
             //{
             //    options.Password.RequireDigit = false;
             //    options.Password.RequiredLength = 6;
@@ -46,6 +46,19 @@ namespace NetCoreAppUserIdentity
             //    options.Password.RequireUppercase = false;
             //    options.Password.RequireNonAlphanumeric = false;
             //});
+
+            //Cookies
+            services.ConfigureApplicationCookie(x =>
+            {
+                x.LogoutPath = new PathString("/Home/SignIn");
+                x.AccessDeniedPath = new PathString("/Home/SignIn");//yetkisi yoksa buraya gönder kullanýcýyý..
+                x.Cookie = new CookieBuilder()
+                {
+                    Name = "Yzl3156Cerez"
+                };
+                x.SlidingExpiration = true; //çerez ömrü
+                x.ExpireTimeSpan = TimeSpan.FromMinutes(1);//1 dk xD 
+            });
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -57,6 +70,10 @@ namespace NetCoreAppUserIdentity
             app.UseRouting();
 
             app.UseStaticFiles();
+
+
+            app.UseAuthentication();
+            app.UseAuthorization();//Authorization iþlemleri için
 
             app.UseEndpoints(x => {
                 x.MapControllerRoute(
