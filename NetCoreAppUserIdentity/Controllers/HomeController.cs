@@ -30,14 +30,16 @@ namespace NetCoreAppUserIdentity.Controllers
         {
             if (ModelState.IsValid)
             {
-                AppUser user = new AppUser();
-                user.Email = registerVM.Email;
-                user.UserName = registerVM.UserName;
+                AppUser newUser = new AppUser();
+                newUser.Email = registerVM.Email;
+                newUser.UserName = registerVM.UserName;
 
-                var result = await _userManager.CreateAsync(user,registerVM.Password);
+                var result = await _userManager.CreateAsync(newUser,registerVM.Password); //Kullanıcıyı ve şifreyi ver. Passwordhash olduğu için burada veriyoruz.
                 if (result.Succeeded)
                 {
-                    return View();
+                    var user = await _userManager.FindByEmailAsync(registerVM.Email);
+                    var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);//Token oluştur..
+                    return RedirectToAction("ConfirmEmail", "Home", new { id = user.Id, token = token });//Onaylamak için gönderilece action.. Burada mail atılıp kullanıcı tıkladığında da action'a yönlendirilebilir... 
                 }
                 else
                 {
@@ -47,7 +49,22 @@ namespace NetCoreAppUserIdentity.Controllers
             return View();
         }
 
-        public IActionResult SignIn()
+        public async Task<IActionResult> ConfirmEmail(string id, string token) //Kullanıcı kaydından sonra Guid bir id gelecek ve token gelecek.
+        {
+            if (id != null && token != null)
+            {
+                var user = await _userManager.FindByIdAsync(id); // kullanıcıyı veritabanında komtrol et..
+                var confirm = await _userManager.ConfirmEmailAsync(user, token); // Kullanıcının emailini onayla.
+                if (confirm.Succeeded)
+                {
+                    return RedirectToAction("SignIn"); // giriş sayfasına yönlendir.
+                }
+            }
+            return View();
+        }
+
+
+        public IActionResult SignIn() // giriş sayfası
         {
             return View();
         }
@@ -56,7 +73,7 @@ namespace NetCoreAppUserIdentity.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = await _userManager.FindByEmailAsync(loginVm.Email); //Email'den db de var böyle bil kullanıcı olup olmadığını bakacak.
+                var user = await _userManager.FindByEmailAsync(loginVm.Email); //Email'den db de kullanıcıyı kontrol et..
                 if (user != null)
                 {
                     var result = _signInManager.PasswordSignInAsync(user, loginVm.Password, false, false);
@@ -66,7 +83,7 @@ namespace NetCoreAppUserIdentity.Controllers
                     }
                     else
                     {
-                        ModelState.AddModelError("errLogin", "Hatalı giriş!!..");
+                        ModelState.AddModelError("errLogin", "Hatalı giriş!!..");//bilgiler eksikse veya yanlışsa tekrar modelstate e gitsin.
                     }
                 }
                 return View();

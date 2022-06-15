@@ -21,7 +21,11 @@ namespace NetCoreAppUserIdentity
             //MVC Service
             services.AddControllersWithViews();
             //Context
-            services.AddDbContext<AppDbContext>(options => options.UseSqlServer("server=DESKTOP-JOE5KI8\\SQLEXPRESS02;database=AppUserIdentityDb;Trusted_Connection=True;"));
+            services.AddDbContext<AppDbContext>(options => options.UseSqlServer("server=YourServerName;database=AppUserIdentityDb;Trusted_Connection=True;"));
+            //II.Way Context (netCore6)
+            //var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            //builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString)); => DefaultConnection => aoosetting.json
+            //AddIdentity
             //AppUser
             services.AddIdentity<AppUser,IdentityRole>(x=>
             {
@@ -32,6 +36,16 @@ namespace NetCoreAppUserIdentity
                 x.Password.RequireNonAlphanumeric = false; //Özel karakter içersinmi
                 x.Password.RequiredLength = 6; //Min 6 karakter..
             }).AddEntityFrameworkStores<AppDbContext>();
+
+            //NetCore6 yapýlandýrma
+            //services.Configure<IdentityOptions>(options =>
+            //{
+            //    options.Password.RequireDigit = false;
+            //    options.Password.RequiredLength = 6;
+            //    options.Password.RequireLowercase = false;
+            //    options.Password.RequireUppercase = false;
+            //    options.Password.RequireNonAlphanumeric = false;
+            //});
         }
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
