@@ -55,9 +55,18 @@ namespace NetCoreAppUserIdentity
                 app.UseDeveloperExceptionPage();
             }
             app.UseRouting();
+
             app.UseStaticFiles();
+
             app.UseEndpoints(x => {
-                x.MapControllerRoute(name: "default", pattern: "{Controller=Home}/{Action=Index}/{id?}");
+                x.MapControllerRoute(
+                    name: "Areas",
+                    pattern: "{area/exist}/{controller=home}/{action=index}/{id?}" //Area Route
+                );
+                x.MapControllerRoute(
+                    name: "default", 
+                    pattern: "{Controller=Home}/{Action=Index}/{id?}" //Default Route
+                );
             });
         }
     }
